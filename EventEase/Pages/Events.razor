@@ -1,0 +1,35 @@
+@page "/events"
+@using EventEase.Models
+
+<h1>Events</h1>
+
+@foreach (var ev in events)
+{
+    <div class="border rounded p-3 mb-3">
+        <p class="m-0">
+            <strong>@ev.Title</strong> — @ev.Date.ToShortDateString() — @ev.Location
+            <br />
+            @ev.Description
+        </p>
+        <a class="btn btn-link p-0 mt-2" href="/events/@ev.Id">Details</a>
+    </div>
+}
+
+<h2 class="mt-4">Edit (two-way binding demo)</h2>
+<EventEase.Components.EventCard Model="@editable" />
+
+@code {
+    private List<EventItem> events = new();
+    private EventItem editable = new();
+
+    protected override void OnInitialized()
+    {
+        events = EventStore.GetAll().ToList();
+        // Clone the first event into the editor so you can see binding
+        var first = events.First();
+        editable = new EventItem {
+            Id = first.Id, Title = first.Title, Date = first.Date,
+            Location = first.Location, Description = first.Description
+        };
+    }
+}

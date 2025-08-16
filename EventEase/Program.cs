@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using EventEase.Data;
+using EventEase.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add SessionState for DI
+builder.Services.AddScoped<SessionState>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

@@ -1,0 +1,68 @@
+@page "/register"
+@using EventEase.Models
+@inject EventEase.Services.SessionState Session
+
+<h1>Register for an Event</h1>
+
+<EditForm Model="@form" OnValidSubmit="@Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-2">
+        <label>Your Name</label>
+        <InputText class="form-control" @bind-Value="form.Name" />
+        <ValidationMessage For="() => form.Name" />
+    </div>
+
+    <div class="mb-2">
+        <label>Choose Event</label>
+        <InputSelect class="form-select" @bind-Value="form.EventId">
+            @foreach (var e in events)
+            {
+                <option value="@e.Id">@e.Title (@e.Date.ToShortDateString())</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => form.EventId" />
+    </div>
+
+    <button class="btn btn-success">Register</button>
+</EditForm>
+
+@if (successMsg is not null)
+{
+    <div class="alert alert-success mt-3">@successMsg</div>
+}
+
+@code {
+    private List<EventItem> events = new();
+    private RegisterForm form = new();
+    private string? successMsg;
+
+    protected override void OnInitialized()
+    {
+        events = EventStore.GetAll().ToList();
+        if (events.Count > 0) form.EventId = events[0].Id;
+    }
+
+    private void Submit()
+    {
+        if (Session.AddAttendee(form.EventId, form.Name))
+        {
+            successMsg = $"Registered {form.Name} for event #{form.EventId}.";
+            form = new RegisterForm(); // reset
+        }
+        else
+        {
+            successMsg = "You may already be registered (duplicate prevented).";
+        }
+    }
+
+    public class RegisterForm
+    {
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(50)]
+        public string Name { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue)]
+        public int EventId { get; set; }
+    }
+}
